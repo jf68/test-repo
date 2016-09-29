@@ -1,4 +1,6 @@
 
+# swp.py
+
 # Sweep operator
 
 # This statistical operator can provide us
@@ -23,6 +25,72 @@
 
 import numpy as np
 import pandas as pd
+
+
+flag = 0
+
+if (flag == 1):
+
+	newdata = pd.read_csv('swptest.csv')
+	#print newdata
+
+	means = np.mean(newdata, axis = 0)
+	#print means
+	means = np.matrix(means)
+	#print np.transpose(means)
+
+	cov = np.cov(newdata, rowvar=False, bias=True)
+	print cov
+
+	corr = pd.DataFrame.corr((newdata))
+	print corr
+
+	sd = newdata.std(ddof=0)
+	print sd
+
+	print "break"
+
+	A = np.matrix(newdata)
+	#print A
+	(a,b) = A.shape
+
+
+	B = np.zeros([b,b])
+
+	for i in range(0,b):
+		for j in range(0,b):
+			temp = np.transpose(A[:,i])
+			B[i,j] = np.dot(temp, A[:,j])
+
+	B = B/a
+
+	# Create a G matrix as in (Rubin 1987, p. 113)
+
+	G = np.vstack((means, B))
+	one = np.array([1])
+	G0 = np.vstack((one, np.transpose(means)))
+	G = np.hstack((G0, G))
+
+	print G
+
+
+	H = swp(0,G)
+
+	print H
+
+
+def augcov(df):
+	mu = np.mean(df, axis = 0)
+	sigma = np.cov(df, rowvar=False, bias=True)
+	G = np.vstack((mu, sigma))
+	one = np.array([1])
+	G0 = np.vstack((one, np.transpose(mu)))
+	G = np.hstack((G0, G))
+
+	return G
+
+
+	
 
 
 # BEGIN SWEEP OPERATOR
@@ -81,41 +149,3 @@ def swp(k, df):
 # END SWEEP OPERATOR
 
 
-newdata = pd.read_csv('swptest.csv')
-#print newdata
-
-means = np.mean(newdata, axis = 0)
-#print means
-means = np.matrix(means)
-#print np.transpose(means)
-
-cov = np.cov(newdata, rowvar=False)
-#print cov
-
-A = np.matrix(newdata)
-#print A
-(a,b) = A.shape
-
-
-B = np.zeros([b,b])
-
-for i in range(0,b):
-	for j in range(0,b):
-		temp = np.transpose(A[:,i])
-		B[i,j] = np.dot(temp, A[:,j])
-
-B = B/a
-
-# Create a G matrix as in (Rubin 1987, p. 113)
-
-G = np.vstack((means, B))
-one = np.array([1])
-G0 = np.vstack((one, np.transpose(means)))
-G = np.hstack((G0, G))
-
-print G
-
-
-H = swp(0,G)
-
-print H
